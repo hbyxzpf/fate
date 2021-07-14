@@ -33,6 +33,8 @@ jobs:
     - name: Build ${{ matrix.platform }} ${{ matrix.arch }}
       if: matrix.platform == 'ubuntu-latest' || matrix.platform == 'macos-latest'
       id: build_linux
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       run: |
           ${GOROOT}/bin/go mod tidy
           export GOARCH=${{ matrix.arch }}
@@ -49,6 +51,8 @@ jobs:
     - name: Build ${{ matrix.platform }} ${{ matrix.arch }}
       if: matrix.platform == 'windows-latest' && matrix.arch == 'amd64'
       id: build_windows_amd64
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       run: |
           go mod tidy
           set GOARCH=${{ matrix.arch }}
@@ -63,6 +67,8 @@ jobs:
     - name: Build ${{ matrix.platform }} ${{ matrix.arch }}
       if: matrix.platform == 'windows-latest' && matrix.arch == '386'
       id: build_windows_386
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       run: |
           go mod tidy
           set GOARCH=${{ matrix.arch }}
@@ -73,11 +79,12 @@ jobs:
           
           echo "compress"
           Compress-Archive -Path fate_windows_386.exe -DestinationPath fate_windows_386.zip
-  
-  
+    
     - name: Upload Linux
       uses: actions/upload-artifact@master
       if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'macos-latest') && env.UPLOAD_BIN_FILE
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       with:
         name: ${{ env.FATENAME }}.tar.gz
         path: ${{ env.FATENAME }}.tar.gz     
@@ -85,6 +92,8 @@ jobs:
     - name: Upload Windows
       uses: actions/upload-artifact@master
       if: matrix.platform == 'windows-latest' && env.UPLOAD_BIN_FILE
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       with:
         name: ${{ env.FATENAME }}.zip
         path: ${{ env.FATENAME }}.zip
@@ -93,9 +102,10 @@ jobs:
     - name: Create Release
       id: create_release_windows
       if: matrix.platform == 'windows-latest' && env.UPLOAD_BIN_FILE
-      uses: ncipollo/release-action@v1
+      uses: ncipollo/release-action@v1 
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       with:
         artifacts: "${{ env.FATENAME }}.zip"
         allowUpdates: true 
@@ -114,6 +124,7 @@ jobs:
       uses: ncipollo/release-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       with:
         artifacts: "${{ env.FATENAME }}.tar.gz"
         allowUpdates: true 
